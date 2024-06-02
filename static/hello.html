@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>app</title>
+</head>
+<body>
+    <input id="image-selector" type="file">
+    <button id="predict-button">Predict</button>
+    <p id="predictions">Predictions will be displayed here.</p>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        let base64Image;
+        $("#image-selector").change(function() {
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let dataURL = reader.result;
+                base64Image = dataURL.replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
+                console.log(base64Image);
+            }
+            reader.readAsDataURL($("#image-selector")[0].files[0]);
+        });
+
+        $("#predict-button").click(function(event) {
+            let message = {
+                image: base64Image
+            }
+            console.log(message);
+            $.ajax({
+                url: "http://127.0.0.1:5000/predict",
+                type: "POST",
+                data: JSON.stringify(message),
+                contentType: "application/json",
+                success: function(response) {
+                    console.log(response);
+                    $("#predictions").text("Prediction: " + response.prediction);
+                },
+                error: function(error) {
+                    console.error("Error:", error);
+                    $("#predictions").text("An error occurred.");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
